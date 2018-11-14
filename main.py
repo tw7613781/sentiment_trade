@@ -1,5 +1,7 @@
 import requests
 import json
+import config
+from telethon import TelegramClient
 from datetime import datetime, timedelta
 from pytrends.request import TrendReq
 def get_google_trend():
@@ -22,6 +24,15 @@ def get_krw_btc_from_upbit():
     except Exception as e:
         print(f'Error when get_krw_btc_from_upbit: {e}')
 
+
+def send(receiver, message):
+    session = config.session
+    api_id = config.api_id
+    api_hash = config.api_hash
+    client = TelegramClient(session, api_id, api_hash).start()
+    client.send_message(receiver, message)
+
+
 if __name__ == '__main__':
     # get google trend data of previous day with format (btc_usd_average, buy_bitcon_average)
     rt = get_google_trend()
@@ -38,3 +49,4 @@ if __name__ == '__main__':
         strategy = 'SELL'
     message = f'BTC USD : buy bitcion = {rt}, rate is {rate1} and upbit BTC/KRW open price is {price[0]}, change price is {price[1]}, change rate is {price[2]}, today strategy is {strategy}, reference with yesterday high {price[3]}, yesterday low {price[4]}'
     print(message)
+    send('me', message)

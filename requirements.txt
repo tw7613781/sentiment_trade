@@ -1,12 +1,17 @@
+async-generator==1.10
 certifi==2018.10.15
 chardet==3.0.4
 idna==2.7
 lxml==4.2.5
 numpy==1.15.4
 pandas==0.23.4
+pyaes==1.6.1
+pyasn1==0.4.4
 python-dateutil==2.7.5
 pytrends==4.4.0
 pytz==2018.7
 requests==2.20.1
+rsa==4.0
 six==1.11.0
+Telethon-sync==1.1.1
 urllib3==1.24.1
