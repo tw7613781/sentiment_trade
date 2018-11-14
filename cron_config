@@ -1,2 +1,2 @@
 # run owl every minutes
-* 9 * * * $HOME/sentiment_trade/run.sh >>/tmp/owl.log 2>&1
+* 9 * * * $HOME/sentiment_trade/run.sh >>/tmp/sentiment_trade.log 2>&1
