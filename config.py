@@ -1,3 +1,4 @@
-api_id = '424778'
-api_hash = 'f5a61bc47ebdb0cae9987790389d679b'
+# use your own api
+api_id = 'xxxxxx'
+api_hash = 'xxxxxxxxxxxxxxxxxxxxxxxx'
 session = 'sentiment'
