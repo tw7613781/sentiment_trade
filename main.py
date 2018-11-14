@@ -1,9 +1,13 @@
 import requests
 import json
 import config
+import logging
 from telethon import TelegramClient
 from datetime import datetime, timedelta
 from pytrends.request import TrendReq
+
+logging.basicConfig(format='%(name)s - %(asctime)s - %(message)s', level=logging.INFO)
+logger = logging.getLogger(__name__)
 def get_google_trend():
     try:
         pytrend = TrendReq(tz=-540)
@@ -13,7 +17,7 @@ def get_google_trend():
         buy_bitcoin_ave = interest_over_time_df['buy bitcoin'].mean()
         return (btc_usd_ave, buy_bitcoin_ave)
     except Exception as e:
-        print(f'Error when get_google_trend: {e}')
+        logger.error(f'Error when get_google_trend: {e}')
 
 def get_krw_btc_from_upbit():
     url = 'https://api.upbit.com/v1/candles/days?market=KRW-BTC'
@@ -22,7 +26,7 @@ def get_krw_btc_from_upbit():
         data = json.loads(r.text, encoding="utf-8")
         return (data[0]['opening_price'], data[0]['change_price'], data[0]['change_rate'], data[0]['high_price'], data[0]['low_price'])
     except Exception as e:
-        print(f'Error when get_krw_btc_from_upbit: {e}')
+        logger.error(f'Error when get_krw_btc_from_upbit: {e}')
 
 
 def send(receiver, message):
@@ -48,5 +52,5 @@ if __name__ == '__main__':
     else:
         strategy = 'SELL'
     message = f'BTC USD : buy bitcion = {rt}, rate is {rate1} and upbit BTC/KRW open price is {price[0]}, change price is {price[1]}, change rate is {price[2]}, today strategy is {strategy}, reference with yesterday high {price[3]}, yesterday low {price[4]}'
-    print(message)
+    logger.info(message)
     send('me', message)
