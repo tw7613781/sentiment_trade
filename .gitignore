@@ -4,3 +4,4 @@ env
 __pycache__
 *.session-journal
 config.py
+history.db
