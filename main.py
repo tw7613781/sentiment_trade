@@ -55,7 +55,7 @@ def get_krw_btc_from_upbit():
     try:
         r = requests.get(url, timeout = 5)
         data = json.loads(r.text, encoding="utf-8")
-        return data[0]['opening_price']
+        return (data[0]['trade_price'], data[0]['high_price'], data[0]['low_price'])
     except Exception as e:
         logger.error(f'Error when get_krw_btc_from_upbit: {e}')
 
@@ -75,19 +75,19 @@ if __name__ == '__main__':
                         bit_usd varchar(20),
                         buy_bitcoin varchar(20),
                         rate varchar(20),
-                        open_price varchar(20),
+                        price varchar(20),
                         change_rate varchar(20),
                         strategy varchar(20))
                     '''
     db_init(cmd)
     # get google trend data of previous day with format (btc_usd_average, buy_bitcon_average)
     gtrend = get_google_trend()
-    # get today's opening price from exchage Upbit
-    price = get_krw_btc_from_upbit()
+    # get current price from exchage Upbit
+    (price, price_high, price_low) = get_krw_btc_from_upbit()
     # calculate ratio of buy bitcon / btc usd
     rate_gtrend = gtrend[1] / gtrend[0]
-    # get opening price of yesterday from db
-    cmd = 'SELECT open_price FROM history ORDER BY date DESC LIMIT 1'
+    # get price of yesterday from db
+    cmd = 'SELECT price FROM history ORDER BY date DESC LIMIT 1'
     st = db_select(cmd)
     # no yesterday's data
     if len(st) == 0:
@@ -109,6 +109,6 @@ if __name__ == '__main__':
     params = (date, gtrend[0], gtrend[1], rate_gtrend, price, rate_price, strategy)
     db_insert(cmd, params)
     # send to telegram
-    message = f'BTC USD : buy bitcoin = {gtrend}, rate is {rate_gtrend} and Upbit BTC/KRW open price is {price}, change price is {price_diff}, change rate is {rate_price}, today strategy is {strategy}'
+    message = f'BTC USD : buy bitcoin = {gtrend}, rate is {rate_gtrend} and Upbit BTC/KRW current price is {price}, change price is {price_diff}, change rate is {rate_price}, today strategy is {strategy} with reference high price {price_high} and low price {price_low}'
     logger.info(message)
     send('me', message)

@@ -2,5 +2,5 @@ env
 .vscode
 .pyc
 __pycache__
-.session-journal
+*.session-journal
 config.py
