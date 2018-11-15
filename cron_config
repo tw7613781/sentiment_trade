@@ -1,2 +1,2 @@
 # run every day 9:00
-0 9 * * * $HOME/sentiment_trade/run.sh >>/tmp/sentiment_trade.log 2>&1
+50 8 * * * $HOME/sentiment_trade/run.sh >>/tmp/sentiment_trade.log 2>&1
