@@ -49,6 +49,7 @@ def get_google_trend():
         return (btc_usd_ave, buy_bitcoin_ave)
     except Exception as e:
         logger.error(f'Error when get_google_trend: {e}')
+        raise e
 
 def get_krw_btc_from_upbit():
     url = 'https://api.upbit.com/v1/candles/days?market=KRW-BTC'
@@ -58,6 +59,7 @@ def get_krw_btc_from_upbit():
         return (data[0]['trade_price'], data[0]['high_price'], data[0]['low_price'])
     except Exception as e:
         logger.error(f'Error when get_krw_btc_from_upbit: {e}')
+        raise e
 
 
 def send(receiver, message):
@@ -69,46 +71,49 @@ def send(receiver, message):
 
 
 if __name__ == '__main__':
-    # init db
-    cmd = '''CREATE TABLE IF NOT EXISTS history
-                        (date varchar(20),
-                        bit_usd varchar(20),
-                        buy_bitcoin varchar(20),
-                        rate varchar(20),
-                        price varchar(20),
-                        change_rate varchar(20),
-                        strategy varchar(20))
-                    '''
-    db_init(cmd)
-    # get google trend data of previous day with format (btc_usd_average, buy_bitcon_average)
-    gtrend = get_google_trend()
-    # get current price from exchage Upbit
-    (price, price_high, price_low) = get_krw_btc_from_upbit()
-    # calculate ratio of buy bitcon / btc usd
-    rate_gtrend = gtrend[1] / gtrend[0]
-    # get price of yesterday from db
-    cmd = 'SELECT price FROM history ORDER BY date DESC LIMIT 1'
-    st = db_select(cmd)
-    # no yesterday's data
-    if len(st) == 0:
-        price_yesterday = 0
-        price_diff = 0
-        rate_price = 0
-    else:
-        price_yesterday = st[0][0]
-        price_diff = float(price) - float(price_yesterday)
-        rate_price = price_diff / float(price_yesterday)            
-    # strategy condition: ratio of buy bitcon / btc usd > 35% and price increase rate > 1%
-    if rate_gtrend > 0.35 and rate_price > 0.01:
-        strategy = 'BUY'
-    else:
-        strategy = 'SELL'
-    # save to db
-    cmd = 'INSERT INTO history VALUES (?,?,?,?,?,?,?)'
-    date = datetime.now().strftime("%Y-%m-%d")
-    params = (date, gtrend[0], gtrend[1], rate_gtrend, price, rate_price, strategy)
-    db_insert(cmd, params)
-    # send to telegram
-    message = f'BTC USD : buy bitcoin = {gtrend}, rate is {rate_gtrend} and Upbit BTC/KRW current price is {price}, change price is {price_diff}, change rate is {rate_price}, today strategy is {strategy} with reference high price {price_high} and low price {price_low}'
-    logger.info(message)
-    send('me', message)
+    try:
+        # init db
+        cmd = '''CREATE TABLE IF NOT EXISTS history
+                            (date varchar(20),
+                            bit_usd varchar(20),
+                            buy_bitcoin varchar(20),
+                            rate varchar(20),
+                            price varchar(20),
+                            change_rate varchar(20),
+                            strategy varchar(20))
+                        '''
+        db_init(cmd)
+        # get google trend data of previous day with format (btc_usd_average, buy_bitcon_average)
+        gtrend = get_google_trend()
+        # get current price from exchage Upbit
+        (price, price_high, price_low) = get_krw_btc_from_upbit()
+        # calculate ratio of buy bitcon / btc usd
+        rate_gtrend = gtrend[1] / gtrend[0]
+        # get price of yesterday from db
+        cmd = 'SELECT price FROM history ORDER BY date DESC LIMIT 1'
+        st = db_select(cmd)
+        # no yesterday's data
+        if len(st) == 0:
+            price_yesterday = 0
+            price_diff = 0
+            rate_price = 0
+        else:
+            price_yesterday = st[0][0]
+            price_diff = float(price) - float(price_yesterday)
+            rate_price = price_diff / float(price_yesterday)            
+        # strategy condition: ratio of buy bitcon / btc usd > 35% and price increase rate > 1%
+        if rate_gtrend > 0.35 and rate_price > 0.01:
+            strategy = 'BUY'
+        else:
+            strategy = 'SELL'
+        # save to db
+        cmd = 'INSERT INTO history VALUES (?,?,?,?,?,?,?)'
+        date = datetime.now().strftime("%Y-%m-%d")
+        params = (date, gtrend[0], gtrend[1], rate_gtrend, price, rate_price, strategy)
+        db_insert(cmd, params)
+        # send to telegram
+        message = f'BTC USD : buy bitcoin = {gtrend}, rate is {rate_gtrend} and Upbit BTC/KRW current price is {price}, change price is {price_diff}, change rate is {rate_price}, today strategy is {strategy} with reference high price {price_high} and low price {price_low}'
+        logger.info(message)
+        send('me', message)
+    except Exception as e:
+        logger.error(f'system abort abnormally due to {e}')
