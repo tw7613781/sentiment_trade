@@ -22,7 +22,7 @@ def index():
     img = StringIO()
     plt.plot(date, bit_usd)
     plt.plot(date, buy_bitcoin)
-    plt.plot(date, price / 10000)
+    plt.plot(date, price)
     plt.plot(date, change_rate)
     plt.title('sentiment trade')
     plt.legend(['bit_usd gtrend', 'buy_bitcoin gtrend', 'price (10000 KoreanWon)', 'change rate with previous day'])
