@@ -20,10 +20,12 @@ def index():
     change_rate = df.change_rate
     strategy = df.strategy
     img = StringIO()
-    plt.plot(date, int(bit_usd))
-    plt.plot(date, int(buy_bitcoin))
-    plt.plot(date, int(price / 10000))
-    plt.plot(date, int(change_rate))
+    plt.plot(date, bit_usd)
+    plt.plot(date, buy_bitcoin)
+    plt.plot(date, price / 10000)
+    plt.plot(date, change_rate)
+    plt.title('sentiment trade')
+    plt.legend(['bit_usd gtrend', 'buy_bitcoin gtrend', 'price (10000 KoreanWon)', 'change rate with previous day'])
     plt.savefig(img, format='png')
     img.seek(0)
 
