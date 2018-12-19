@@ -1,7 +1,6 @@
 import sqlite3
 import base64
 from io import StringIO
-import matplotlib.pyplot as plt
 from matplotlib import pyplot as plt
 from flask import Flask, render_template
 import pandas as pd
