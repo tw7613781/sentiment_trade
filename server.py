@@ -27,11 +27,12 @@ def index():
     plt.title('sentiment trade')
     plt.legend(['bit_usd gtrend', 'buy_bitcoin gtrend', 'price (10000 KoreanWon)', 'change rate with previous day'])
     plt.savefig(img, format='png')
-    img.seek(0)
 
-    plot_url = base64.b64encode(img.getvalue())
+    html = """<html><body> 
+<img src="data:image/png;base64,{}"/> 
+</body></html>""".format(base64.encodebytes(img.getvalue()).decode())
 
-    return render_template('index.html', plot_url=plot_url)
+    return html
 
 if __name__ == '__main__':
     APP.run()
