@@ -1,6 +1,6 @@
 import sqlite3
 import base64
-from io import StringIO
+from io import BytesIO
 from matplotlib import pyplot as plt
 from flask import Flask, render_template
 import pandas as pd
@@ -19,7 +19,7 @@ def index():
     price = df.price
     change_rate = df.change_rate
     strategy = df.strategy
-    img = StringIO()
+    img = BytesIO()
     plt.plot(date, bit_usd)
     plt.plot(date, buy_bitcoin)
     plt.plot(date, price)
