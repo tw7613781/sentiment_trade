@@ -1,6 +1,15 @@
+
 # Idea
 
 The idea behind the code is from [How I Created a Bitcoin Trading Algorithm Using Sentiment Analysis With a 29% Return](https://hackernoon.com/how-i-created-a-bitcoin-trading-algorithm-with-a-29-return-rate-using-sentiment-analysis-b0db0e777f4), which basically it predicts the price by google trend.
+
+# Component
+## Main   
+* The main component collect data from local cryptocurrency exchange and google trend, make a prediction based on the article above 
+
+## Web server
+* Analysis collected data and visualize in a flask web server    
+* [demo](http://13.125.213.49/)
 
 # How to run the code
 
@@ -10,16 +19,23 @@ pip install -r requirements.txt
 `
 
 ## run the code
-`
+
+## main component
+`      
 python main.py
+`
+
+## web server
+`
+python server.py
 `
 
 ## using telegram to send message
 to use telegram, it need a file named **config.py**
 ```
-api_id = 'your api id'
-api_hash = 'your api hash'
-session = 'any_name'
+API_ID = 'your api id'
+API_HASH = 'your api hash'
+SESSION = 'any_name'
 ```
 
 ## Example output
