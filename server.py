@@ -9,7 +9,7 @@ from matplotlib import pyplot as plt, dates as mdates
 from flask import Flask, render_template
 import pandas as pd
 import numpy as np
-from main import get_google_trend_detail
+from main import get_google_trend_detail, get_krw_btc_from_upbit_detail
 APP = Flask(__name__)
 
 
@@ -71,14 +71,17 @@ def create_graph_gtrend():
     plt.gca().xaxis.set_major_locator(mdates.HourLocator(interval=4))
     date_dataframe = btc_usd.axes[0].to_frame(index=False)
     date = date_dataframe['date']
+    price_list = get_krw_btc_from_upbit_detail()
+    price = pd.Series(price_list)
     plt.plot(date, btc_usd)
     plt.plot(date, buy_bitcoin)
     plt.plot(date, buy_bitcoin/btc_usd*100)
+    plt.plot(date, price/100000)
     plt.axhline(y=25, color='k')
     plt.axhline(y=35, color='k')
     plt.gcf().autofmt_xdate()
     plt.title('recent 7 days gtrend')
-    plt.legend(['btc_usd', 'buy_bitcoin', 'rate of gtrend'])
+    plt.legend(['btc_usd', 'buy_bitcoin', 'rate of gtrend', 'price (100000 KRW)'])
     img = io.BytesIO()
     plt.savefig(img, format='png')
     img.seek(0)

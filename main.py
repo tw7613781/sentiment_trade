@@ -51,12 +51,28 @@ def get_krw_btc_from_upbit():
     url = 'https://api.upbit.com/v1/candles/days?market=KRW-BTC'
     try:
         result = requests.get(url, timeout=5)
-        data = json.loads(result.text, encoding="utf-8")
+        data = json.loads(result.text, encoding='utf-8')
         return (data[0]['trade_price'], data[0]['high_price'], data[0]['low_price'])
     except Exception as error:
         LOGGER.error('Error when get_krw_btc_from_upbit: %s', error)
         raise error
 
+def get_krw_btc_from_upbit_detail():
+    '''
+    get bitcoin price with 60 min interval of 7 days
+    '''
+    try:
+        url = "https://api.upbit.com/v1/candles/minutes/60"
+        querystring = {'market':'KRW-BTC', 'count':168}
+        response = requests.request('GET', url, params=querystring)
+        data = json.loads(response.text, encoding='utf-8')
+        price = []
+        for candle in data:
+            price.append(candle['trade_price'])
+        return price
+    except Exception as error:
+        LOGGER.error('Error when get_krw_btc_from_upbit_detail: %s', error)
+        raise error
 
 def send(receiver, msg):
     '''
