@@ -69,7 +69,7 @@ def get_krw_btc_from_upbit_detail():
         price = []
         for candle in data:
             price.append(candle['trade_price'])
-        return price
+        return price.reverse()
     except Exception as error:
         LOGGER.error('Error when get_krw_btc_from_upbit_detail: %s', error)
         raise error
