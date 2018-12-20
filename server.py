@@ -63,9 +63,13 @@ def create_graph_gtrend():
     '''
     (btc_usd, buy_bitcoin) = get_google_trend_detail()
     plt.figure(figsize=(15, 6))
-    xdata = range(1, btc_usd.size + 1)
-    plt.plot(xdata, btc_usd)
-    plt.plot(xdata, buy_bitcoin)
+    plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%m/%d/%Y-%H:%M:%S'))
+    plt.gca().xaxis.set_major_locator(mdates.HourLocator(interval=4))
+    date_dataframe = btc_usd.axes[0].to_frame(index=False)
+    date = date_dataframe['date']
+    plt.plot(date, btc_usd)
+    plt.plot(date, buy_bitcoin)
+    plt.gcf().autofmt_xdate()
     plt.title('recent 7 days gtrend')
     plt.legend(['btc_usd', 'buy_bitcoin'])
     img = io.BytesIO()
