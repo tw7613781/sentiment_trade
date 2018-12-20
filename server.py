@@ -31,7 +31,7 @@ def create_graph_main():
     cmd = 'SELECT * FROM history ORDER BY date'
     data_frame = pd.read_sql_query(cmd, cnx)
     date = pd.to_datetime(data_frame['date'])
-    bit_usd = data_frame.bit_usd.astype(np.float)
+    btc_usd = data_frame.bit_usd.astype(np.float)
     buy_bitcoin = data_frame.buy_bitcoin.astype(np.float)
     price = data_frame.price.astype(np.float)
     change_rate = data_frame.change_rate.astype(np.float)*100
@@ -40,10 +40,10 @@ def create_graph_main():
     plt.figure(figsize=(15, 6))
     plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%m/%d/%Y'))
     plt.gca().xaxis.set_major_locator(mdates.DayLocator())
-    plt.plot(date, price/100000)
-    plt.plot(date, bit_usd)
+    plt.plot(date, price/10000)
+    plt.plot(date, btc_usd)
     plt.plot(date, buy_bitcoin)
-    plt.plot(date, buy_bitcoin/bit_usd*100)
+    plt.plot(date, buy_bitcoin/btc_usd*100)
     plt.plot(date, change_rate, '.')
     plt.plot(date, strategy, '^')
     plt.axhline(y=0, color='k')
@@ -51,8 +51,8 @@ def create_graph_main():
     plt.axhline(y=35, color='k')
     plt.gcf().autofmt_xdate()
     plt.title('sentiment trade')
-    plt.legend(['price (100000 KRW)', 'bit_usd gtrend',
-                'buy_bitcoin gtrend', 'rate of gtrend', 
+    plt.legend(['price (10000 KRW)', 'btc_usd gtrend',
+                'buy_bitcoin gtrend', 'rate of gtrend',
                 'change rate with previous day', 'strategy'])
     img = io.BytesIO()
     plt.savefig(img, format='png')
@@ -73,15 +73,15 @@ def create_graph_gtrend():
     date = date_dataframe['date']
     price_list = get_krw_btc_from_upbit_detail()
     price = pd.Series(price_list)
+    plt.plot(date, price/10000)
     plt.plot(date, btc_usd)
     plt.plot(date, buy_bitcoin)
     plt.plot(date, buy_bitcoin/btc_usd*100)
-    plt.plot(date, price/100000)
     plt.axhline(y=25, color='k')
     plt.axhline(y=35, color='k')
     plt.gcf().autofmt_xdate()
     plt.title('recent 7 days gtrend')
-    plt.legend(['btc_usd', 'buy_bitcoin', 'rate of gtrend', 'price (100000 KRW)'])
+    plt.legend(['price (10000 KRW)', 'btc_usd', 'buy_bitcoin', 'rate of gtrend'])
     img = io.BytesIO()
     plt.savefig(img, format='png')
     img.seek(0)
