@@ -43,13 +43,17 @@ def create_graph_main():
     plt.plot(date, price/100000)
     plt.plot(date, bit_usd)
     plt.plot(date, buy_bitcoin)
+    plt.plot(date, buy_bitcoin/bit_usd*100)
     plt.plot(date, change_rate, '.')
     plt.plot(date, strategy, '^')
+    plt.axhline(y=0, color='k')
+    plt.axhline(y=25, color='k')
+    plt.axhline(y=35, color='k')
     plt.gcf().autofmt_xdate()
     plt.title('sentiment trade')
     plt.legend(['price (100000 KRW)', 'bit_usd gtrend',
-                'buy_bitcoin gtrend', 'change rate with previous day',
-                'strategy'])
+                'buy_bitcoin gtrend', 'rate of gtrend', 
+                'change rate with previous day', 'strategy'])
     img = io.BytesIO()
     plt.savefig(img, format='png')
     img.seek(0)
@@ -69,9 +73,12 @@ def create_graph_gtrend():
     date = date_dataframe['date']
     plt.plot(date, btc_usd)
     plt.plot(date, buy_bitcoin)
+    plt.plot(date, buy_bitcoin/btc_usd*100)
+    plt.axhline(y=25, color='k')
+    plt.axhline(y=35, color='k')
     plt.gcf().autofmt_xdate()
     plt.title('recent 7 days gtrend')
-    plt.legend(['btc_usd', 'buy_bitcoin'])
+    plt.legend(['btc_usd', 'buy_bitcoin', 'rate of gtrend'])
     img = io.BytesIO()
     plt.savefig(img, format='png')
     img.seek(0)
