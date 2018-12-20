@@ -5,3 +5,4 @@ __pycache__
 *.session-journal
 config.py
 history.db
+.DS_Store
