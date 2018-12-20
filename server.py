@@ -3,6 +3,8 @@ server provide a web server to host a data visualization and analysis
 '''
 
 import sqlite3
+import io
+import base64
 from matplotlib import pyplot as plt, dates as mdates
 from flask import Flask, render_template
 import pandas as pd
@@ -16,12 +18,12 @@ def index():
     '''
     provide route logic for '/'
     '''
-    create_fig()
-    return render_template('index.html', url='static/plot.png')
+    graph_url = create_graph()
+    return render_template('index.html', graph_url=graph_url)
 
-def create_fig():
+def create_graph():
     '''
-    create fig based on collected data
+    create a analysis figure based on collected data and save it to memory as Bytes
     '''
     cnx = sqlite3.connect('history.db')
     cmd = 'SELECT * FROM history ORDER BY date'
@@ -46,7 +48,13 @@ def create_fig():
     plt.legend(['price (100000 KRW)', 'bit_usd gtrend',
                 'buy_bitcoin gtrend', 'change rate with previous day',
                 'strategy'])
-    plt.savefig('static/plot.png')
+    img = io.BytesIO()
+    plt.savefig(img, format='png')
+    img.seek(0)
+    graph_url = base64.b64encode(img.getvalue()).decode()
+    plt.close()
+    return graph_url
 
 if __name__ == '__main__':
+    APP.debug=True
     APP.run()
