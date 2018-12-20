@@ -29,6 +29,21 @@ def get_google_trend():
         LOGGER.error('Error when get_google_trend: %s', error)
         raise error
 
+def get_google_trend_detail():
+    '''
+    get google detail trend data of 5 days
+    '''
+    try:
+        pytrend = TrendReq(tz=-540)
+        pytrend.build_payload(kw_list=['BTC USD', 'buy bitcoin'], timeframe='now 7-d')
+        interest_over_time_df = pytrend.interest_over_time()
+        btc_usd = interest_over_time_df['BTC USD']
+        buy_bitcoin = interest_over_time_df['buy bitcoin']
+        return (btc_usd, buy_bitcoin)
+    except Exception as error:
+        LOGGER.error('Error when get_google_trend_detail: %s', error)
+        raise error
+
 def get_krw_btc_from_upbit():
     '''
     get bitcoin price from upbit exchange

@@ -9,7 +9,7 @@ from matplotlib import pyplot as plt, dates as mdates
 from flask import Flask, render_template
 import pandas as pd
 import numpy as np
-
+from main import get_google_trend_detail
 APP = Flask(__name__)
 
 
@@ -18,10 +18,12 @@ def index():
     '''
     provide route logic for '/'
     '''
-    graph_url = create_graph()
-    return render_template('index.html', graph_url=graph_url)
+    graph_url_main = create_graph_main()
+    graph_url_gtrend = create_graph_gtrend()
+    return render_template('index.html', graph_url_main=graph_url_main,
+                           graph_url_gtrend=graph_url_gtrend)
 
-def create_graph():
+def create_graph_main():
     '''
     create a analysis figure based on collected data and save it to memory as Bytes
     '''
@@ -48,6 +50,24 @@ def create_graph():
     plt.legend(['price (100000 KRW)', 'bit_usd gtrend',
                 'buy_bitcoin gtrend', 'change rate with previous day',
                 'strategy'])
+    img = io.BytesIO()
+    plt.savefig(img, format='png')
+    img.seek(0)
+    graph_url = base64.b64encode(img.getvalue()).decode()
+    plt.close()
+    return graph_url
+
+def create_graph_gtrend():
+    '''
+    create a figure base on recent 7 days gtrend data
+    '''
+    (btc_usd, buy_bitcoin) = get_google_trend_detail()
+    plt.figure(figsize=(15, 6))
+    xdata = range(1, btc_usd.size + 1)
+    plt.plot(xdata, btc_usd)
+    plt.plot(xdata, buy_bitcoin)
+    plt.title('recent 7 days gtrend')
+    plt.legend(['btc_usd', 'buy_bitcoin'])
     img = io.BytesIO()
     plt.savefig(img, format='png')
     img.seek(0)
