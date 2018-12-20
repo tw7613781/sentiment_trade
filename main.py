@@ -1,16 +1,23 @@
-import requests
+'''
+main module provide data collection, computation and notification
+'''
 import json
-import config
 import logging
-import db_sqlite
-from telethon import TelegramClient
 from datetime import datetime
+
+from telethon import TelegramClient
 from pytrends.request import TrendReq
+import requests
+import db_sqlite
+import config
 
 logging.basicConfig(format='%(name)s - %(asctime)s - %(message)s', level=logging.INFO)
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 def get_google_trend():
+    '''
+    get google trend data
+    '''
     try:
         pytrend = TrendReq(tz=-540)
         pytrend.build_payload(kw_list=['BTC USD', 'buy bitcoin'], timeframe='now 1-d')
@@ -18,73 +25,83 @@ def get_google_trend():
         btc_usd_ave = interest_over_time_df['BTC USD'].mean()
         buy_bitcoin_ave = interest_over_time_df['buy bitcoin'].mean()
         return (btc_usd_ave, buy_bitcoin_ave)
-    except Exception as e:
-        logger.error(f'Error when get_google_trend: {e}')
-        raise e
+    except Exception as error:
+        LOGGER.error('Error when get_google_trend: %s', error)
+        raise error
 
 def get_krw_btc_from_upbit():
+    '''
+    get bitcoin price from upbit exchange
+    '''
     url = 'https://api.upbit.com/v1/candles/days?market=KRW-BTC'
     try:
-        r = requests.get(url, timeout = 5)
-        data = json.loads(r.text, encoding="utf-8")
+        result = requests.get(url, timeout=5)
+        data = json.loads(result.text, encoding="utf-8")
         return (data[0]['trade_price'], data[0]['high_price'], data[0]['low_price'])
-    except Exception as e:
-        logger.error(f'Error when get_krw_btc_from_upbit: {e}')
-        raise e
+    except Exception as error:
+        LOGGER.error('Error when get_krw_btc_from_upbit: %s', error)
+        raise error
 
 
-def send(receiver, message):
+def send(receiver, msg):
+    '''
+    send notification by telegram api
+    '''
     session = config.session
     api_id = config.api_id
     api_hash = config.api_hash
     client = TelegramClient(session, api_id, api_hash).start()
-    client.send_message(receiver, message)
+    client.send_message(receiver, msg)
 
 
 if __name__ == '__main__':
     try:
         # init db
-        cmd = '''CREATE TABLE IF NOT EXISTS history
+        CMD = '''CREATE TABLE IF NOT EXISTS history
                             (date varchar(20),
                             bit_usd varchar(20),
                             buy_bitcoin varchar(20),
                             rate varchar(20),
                             price varchar(20),
                             change_rate varchar(20),
-                            strategy varchar(20))
+                            STRATEGY varchar(20))
                         '''
-        db_sqlite.db_init(cmd)
+        db_sqlite.db_init(CMD)
         # get google trend data of previous day with format (btc_usd_average, buy_bitcon_average)
-        gtrend = get_google_trend()
+        GTREND = get_google_trend()
         # get current price from exchage Upbit
-        (price, price_high, price_low) = get_krw_btc_from_upbit()
+        (PRICE, PRICE_HIGH, PRICE_LOW) = get_krw_btc_from_upbit()
         # calculate ratio of buy bitcon / btc usd
-        rate_gtrend = gtrend[1] / gtrend[0]
+        RATE_GREAND = GTREND[1] / GTREND[0]
         # get price of yesterday from db
-        cmd = 'SELECT price FROM history ORDER BY date DESC LIMIT 1'
-        st = db_sqlite.db_select(cmd)
+        CMD = 'SELECT price FROM history ORDER BY date DESC LIMIT 1'
+        ST = db_sqlite.db_select(CMD)
         # no yesterday's data
-        if len(st) == 0:
-            price_yesterday = 0
-            price_diff = 0
-            rate_price = 0
+        if not ST:
+            PRICE_YESTERDAY = 0
+            PRICE_DIFF = 0
+            RATE_PRICE = 0
         else:
-            price_yesterday = st[0][0]
-            price_diff = float(price) - float(price_yesterday)
-            rate_price = price_diff / float(price_yesterday)            
-        # strategy condition: ratio of buy bitcon / btc usd > 35% and price increase rate > 1%
-        if rate_gtrend > 0.35 and rate_price > 0.01:
-            strategy = 'BUY'
+            PRICE_YESTERDAY = ST[0][0]
+            PRICE_DIFF = float(PRICE) - float(PRICE_YESTERDAY)
+            RATE_PRICE = PRICE_DIFF / float(PRICE_YESTERDAY)
+        # STRATEGY condition: ratio of buy bitcon / btc usd > 35% and price increase rate > 1%
+        if RATE_GREAND > 0.35 and RATE_PRICE > 0.01:
+            STRATEGY = 'BUY'
         else:
-            strategy = 'SELL'
+            STRATEGY = 'SELL'
         # save to db
-        cmd = 'INSERT INTO history VALUES (?,?,?,?,?,?,?)'
-        date = datetime.now().strftime("%Y-%m-%d")
-        params = (date, gtrend[0], gtrend[1], rate_gtrend, price, rate_price, strategy)
-        db_sqlite.db_insert(cmd, params)
+        CMD = 'INSERT INTO history VALUES (?,?,?,?,?,?,?)'
+        DATE = datetime.now().strftime("%Y-%m-%d")
+        PARAMS = (DATE, GTREND[0], GTREND[1], RATE_GREAND, PRICE, RATE_PRICE, STRATEGY)
+        db_sqlite.db_insert(CMD, PARAMS)
         # send to telegram
-        message = f'BTC USD : buy bitcoin = {gtrend}, rate is {rate_gtrend} and Upbit BTC/KRW current price is {price}, change price is {price_diff}, change rate is {rate_price}, today strategy is {strategy} with reference high price {price_high} and low price {price_low}'
-        logger.info(message)
-        send('me', message)
-    except Exception as e:
-        logger.error(f'system abort abnormally due to {e}')
+        MESSAGE = f'BTC USD : buy bitcoin = {GTREND}, rate is {RATE_GREAND} \
+                    and Upbit BTC/KRW current price is {PRICE}, change price is {PRICE_DIFF}, \
+                    change rate is {RATE_PRICE}, \
+                    today STRATEGY is {STRATEGY} with reference \
+                    high price {PRICE_HIGH} and low price {PRICE_LOW}'
+        LOGGER.info(MESSAGE)
+        send('me', MESSAGE)
+    except BaseException as error:
+        LOGGER.error('system abort abnormally due to %s', error)

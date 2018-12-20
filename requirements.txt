@@ -5,3 +5,6 @@ Telethon-sync==1.1.1
 Flask==1.0.2
 matplotlib==3.0.2
 pandas==0.23.4
+numpy==1.15.4
+gunicorn==19.9.0
+pylint==2.2.2
