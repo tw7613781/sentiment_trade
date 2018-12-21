@@ -20,11 +20,10 @@ def get_google_trend():
     '''
     try:
         pytrend = TrendReq(tz=-540)
-        pytrend.build_payload(kw_list=['BTC USD', 'buy bitcoin'], timeframe='now 1-d')
+        pytrend.build_payload(kw_list=['BTC USD'], timeframe='now 1-d')
         interest_over_time_df = pytrend.interest_over_time()
         btc_usd_ave = interest_over_time_df['BTC USD'].mean()
-        buy_bitcoin_ave = interest_over_time_df['buy bitcoin'].mean()
-        return (btc_usd_ave, buy_bitcoin_ave)
+        return btc_usd_ave
     except Exception as error:
         LOGGER.error('Error when get_google_trend: %s', error)
         raise error
@@ -103,35 +102,35 @@ if __name__ == '__main__':
                         '''
         db_sqlite.db_init(CMD)
         # get google trend data of previous day with format (btc_usd_average, buy_bitcon_average)
-        GTREND = get_google_trend()
+        BTC_USD_AVE = get_google_trend()
         # get current price from exchage Upbit
         (PRICE, PRICE_HIGH, PRICE_LOW) = get_krw_btc_from_upbit()
-        # calculate ratio of buy bitcon / btc usd
-        RATE_GREAND = GTREND[1] / GTREND[0]
         # get price of yesterday from db
-        CMD = 'SELECT price FROM history ORDER BY date DESC LIMIT 1'
+        CMD = 'SELECT price, bit_usd FROM history ORDER BY date DESC LIMIT 1'
         ST = db_sqlite.db_select(CMD)
         # no yesterday's data
         if not ST:
-            PRICE_YESTERDAY = 0
-            PRICE_DIFF = 0
             RATE_PRICE = 0
+            RATE_GTREND = 0
         else:
             PRICE_YESTERDAY = ST[0][0]
             PRICE_DIFF = float(PRICE) - float(PRICE_YESTERDAY)
             RATE_PRICE = PRICE_DIFF / float(PRICE_YESTERDAY)
+            GTREND_YESTERDAY = ST[0][1]
+            GTREND_DIFF = float(BTC_USD_AVE) / float(GTREND_YESTERDAY)
+            RATE_GTREND = GTREND_DIFF / float(GTREND_YESTERDAY)
         # STRATEGY condition: ratio of buy bitcon / btc usd > 35% and price increase rate > 1%
-        if RATE_GREAND > 0.35 and RATE_PRICE > 0.01:
+        if RATE_GTREND > 0.05 and RATE_PRICE > 0:
             STRATEGY = 'BUY'
         else:
             STRATEGY = 'SELL'
         # save to db
         CMD = 'INSERT INTO history VALUES (?,?,?,?,?,?,?)'
         DATE = datetime.now().strftime("%Y-%m-%d")
-        PARAMS = (DATE, GTREND[0], GTREND[1], RATE_GREAND, PRICE, RATE_PRICE, STRATEGY)
+        PARAMS = (DATE, BTC_USD_AVE, 'n/a', 'n/a', PRICE, RATE_PRICE, STRATEGY)
         db_sqlite.db_insert(CMD, PARAMS)
         # send to telegram
-        MESSAGE = f'BTC USD : buy bitcoin = {GTREND}, rate is {RATE_GREAND} \
+        MESSAGE = f'BTC USD : {BTC_USD_AVE}, rate is {RATE_GTREND} \
                     and Upbit BTC/KRW current price is {PRICE}, change price is {PRICE_DIFF}, \
                     change rate is {RATE_PRICE}, \
                     today STRATEGY is {STRATEGY} with reference \
