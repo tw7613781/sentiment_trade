@@ -31,15 +31,15 @@ def get_google_trend():
 
 def get_google_trend_detail():
     '''
-    get google detail trend data of 5 days
+    get google detail trend data of recent 3 month
+    latest 3 days data miss
     '''
     try:
         pytrend = TrendReq(tz=-540)
-        pytrend.build_payload(kw_list=['BTC USD', 'buy bitcoin'], timeframe='now 7-d')
+        pytrend.build_payload(kw_list=['BTC USD'], timeframe='today 3-m')
         interest_over_time_df = pytrend.interest_over_time()
         btc_usd = interest_over_time_df['BTC USD']
-        buy_bitcoin = interest_over_time_df['buy bitcoin']
-        return (btc_usd, buy_bitcoin)
+        return btc_usd
     except Exception as error:
         LOGGER.error('Error when get_google_trend_detail: %s', error)
         raise error
@@ -59,17 +59,20 @@ def get_krw_btc_from_upbit():
 
 def get_krw_btc_from_upbit_detail():
     '''
-    get bitcoin price with 60 min interval of 7 days
+    get bitcoin price with day interval of recent 3 month
+    remove latest 3 days data to match gtrend
     '''
     try:
-        url = "https://api.upbit.com/v1/candles/minutes/60"
-        querystring = {'market':'KRW-BTC', 'count':168}
+        url = "https://api.upbit.com/v1/candles/days"
+        querystring = {'market':'KRW-BTC', 'count': 93}
         response = requests.request('GET', url, params=querystring)
         data = json.loads(response.text, encoding='utf-8')
         price = []
         for candle in data:
             price.append(candle['trade_price'])
         price.reverse()
+        for _ in range(3):
+            price.pop()
         return price
     except Exception as error:
         LOGGER.error('Error when get_krw_btc_from_upbit_detail: %s', error)

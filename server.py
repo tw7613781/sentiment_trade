@@ -66,28 +66,38 @@ def create_graph_main():
 
 def create_graph_gtrend():
     '''
-    create a figure base on recent 7 days gtrend data
+    create a figure base on recent 3 month gtrend data
     '''
-    (btc_usd, buy_bitcoin) = get_google_trend_detail()
-    btc_usd_normalized = (btc_usd - btc_usd.min()) / (btc_usd.max() - btc_usd.min()) * 100
-    buy_bitcoin_normalized = (buy_bitcoin - buy_bitcoin.min()) / (buy_bitcoin.max() - buy_bitcoin.min()) * 100
-    plt.figure(figsize=(15, 6))
-    plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%m/%d/%Y-%H:%M:%S'))
-    plt.gca().xaxis.set_major_locator(mdates.HourLocator(interval=4))
-    date_dataframe = btc_usd.axes[0].to_frame(index=False)
-    date = date_dataframe['date']
+    btc_usd = get_google_trend_detail()
     price_list = get_krw_btc_from_upbit_detail()
+    diff = len(price_list) - btc_usd.size
+    if diff != 0:
+        for _ in range(diff):
+            price_list.pop(0)
+    # btc_usd = (btc_usd - btc_usd.min()) / (btc_usd.max() - btc_usd.min()) * 100
     price = pd.Series(price_list)
     price = (price - price.min()) / (price.max() - price.min()) * 100
+    plt.figure(figsize=(21, 6))
+    plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%m/%d'))
+    plt.gca().xaxis.set_major_locator(mdates.DayLocator())
+    date_dataframe = btc_usd.axes[0].to_frame(index=False)
+    date = date_dataframe['date']
+    strategy = ['SELL']*btc_usd.size
+    for x in range(1, btc_usd.size):
+        trend_diff = btc_usd.iloc[x] - btc_usd.iloc[x-1]
+        price_diff = price.iloc[x] - price.iloc[x-1]
+        if trend_diff > 5:
+            if price_diff > 0:
+                strategy[x] = 'BUY'
+    dic = {'BUY': 100, 'SELL': -100}
+    strategy = pd.Series(strategy)
+    strategy = strategy.map(dic)
     plt.plot(date, price)
-    plt.plot(date, btc_usd_normalized)
-    plt.plot(date, buy_bitcoin_normalized)
-    plt.plot(date, buy_bitcoin/btc_usd*100)
-    plt.axhline(y=25, color='k')
-    plt.axhline(y=35, color='k')
+    plt.plot(date, btc_usd)
+    plt.plot(date, strategy, '^')
     plt.gcf().autofmt_xdate()
-    plt.title('recent 7 days gtrend')
-    plt.legend(['price (normalized)', 'btc_usd(normalized)', 'buy_bitcoin(normalized)', 'rate of gtrend'])
+    plt.title('recent 3 month gtrend-price')
+    plt.legend(['price (normalized)', 'btc_usd', 'strategy'])
     img = io.BytesIO()
     plt.savefig(img, format='png')
     img.seek(0)
