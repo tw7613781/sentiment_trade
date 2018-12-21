@@ -32,7 +32,9 @@ def create_graph_main():
     data_frame = pd.read_sql_query(cmd, cnx)
     date = pd.to_datetime(data_frame['date'])
     btc_usd = data_frame.bit_usd.astype(np.float)
+    btc_usd_normalized = (btc_usd - btc_usd.min()) / (btc_usd.max() - btc_usd.min()) * 100
     buy_bitcoin = data_frame.buy_bitcoin.astype(np.float)
+    buy_bitcoin_normalized = (buy_bitcoin - buy_bitcoin.min()) / (buy_bitcoin.max() - buy_bitcoin.min()) * 100
     price = data_frame.price.astype(np.float)
     price = (price - price.min()) / (price.max() - price.min()) * 100
     change_rate = data_frame.change_rate.astype(np.float)*100
@@ -42,8 +44,8 @@ def create_graph_main():
     plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%m/%d/%Y'))
     plt.gca().xaxis.set_major_locator(mdates.DayLocator())
     plt.plot(date, price)
-    plt.plot(date, btc_usd)
-    plt.plot(date, buy_bitcoin)
+    plt.plot(date, btc_usd_normalized)
+    plt.plot(date, buy_bitcoin_normalized)
     plt.plot(date, buy_bitcoin/btc_usd*100)
     plt.plot(date, change_rate, '.')
     plt.plot(date, strategy, '^')
@@ -52,8 +54,8 @@ def create_graph_main():
     plt.axhline(y=35, color='k')
     plt.gcf().autofmt_xdate()
     plt.title('sentiment trade')
-    plt.legend(['price (10000 KRW)', 'btc_usd gtrend',
-                'buy_bitcoin gtrend', 'rate of gtrend',
+    plt.legend(['price(normalized)', 'btc_usd gtrend(normalized)',
+                'buy_bitcoin gtrend(normalized)', 'rate of gtrend',
                 'change rate with previous day', 'strategy'])
     img = io.BytesIO()
     plt.savefig(img, format='png')
@@ -67,6 +69,8 @@ def create_graph_gtrend():
     create a figure base on recent 7 days gtrend data
     '''
     (btc_usd, buy_bitcoin) = get_google_trend_detail()
+    btc_usd_normalized = (btc_usd - btc_usd.min()) / (btc_usd.max() - btc_usd.min()) * 100
+    buy_bitcoin_normalized = (buy_bitcoin - buy_bitcoin.min()) / (buy_bitcoin.max() - buy_bitcoin.min()) * 100
     plt.figure(figsize=(15, 6))
     plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%m/%d/%Y-%H:%M:%S'))
     plt.gca().xaxis.set_major_locator(mdates.HourLocator(interval=4))
@@ -76,14 +80,14 @@ def create_graph_gtrend():
     price = pd.Series(price_list)
     price = (price - price.min()) / (price.max() - price.min()) * 100
     plt.plot(date, price)
-    plt.plot(date, btc_usd)
-    plt.plot(date, buy_bitcoin)
+    plt.plot(date, btc_usd_normalized)
+    plt.plot(date, buy_bitcoin_normalized)
     plt.plot(date, buy_bitcoin/btc_usd*100)
     plt.axhline(y=25, color='k')
     plt.axhline(y=35, color='k')
     plt.gcf().autofmt_xdate()
     plt.title('recent 7 days gtrend')
-    plt.legend(['price (10000 KRW)', 'btc_usd', 'buy_bitcoin', 'rate of gtrend'])
+    plt.legend(['price (normalized)', 'btc_usd(normalized)', 'buy_bitcoin(normalized)', 'rate of gtrend'])
     img = io.BytesIO()
     plt.savefig(img, format='png')
     img.seek(0)
