@@ -41,7 +41,7 @@ def create_graph_main():
     plt.figure(figsize=(15, 6))
     plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%m/%d/%Y'))
     plt.gca().xaxis.set_major_locator(mdates.DayLocator())
-    plt.plot(date, price/10000)
+    plt.plot(date, price)
     plt.plot(date, btc_usd)
     plt.plot(date, buy_bitcoin)
     plt.plot(date, buy_bitcoin/btc_usd*100)
@@ -75,7 +75,7 @@ def create_graph_gtrend():
     price_list = get_krw_btc_from_upbit_detail()
     price = pd.Series(price_list)
     price = (price - price.min()) / (price.max() - price.min()) * 100
-    plt.plot(date, price/10000)
+    plt.plot(date, price)
     plt.plot(date, btc_usd)
     plt.plot(date, buy_bitcoin)
     plt.plot(date, buy_bitcoin/btc_usd*100)
