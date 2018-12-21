@@ -34,6 +34,7 @@ def create_graph_main():
     btc_usd = data_frame.bit_usd.astype(np.float)
     buy_bitcoin = data_frame.buy_bitcoin.astype(np.float)
     price = data_frame.price.astype(np.float)
+    price = (price - price.min()) / (price.max() - price.min()) * 100
     change_rate = data_frame.change_rate.astype(np.float)*100
     dic = {'BUY': 100, 'SELL': -100}
     strategy = data_frame.strategy.map(dic)
@@ -73,6 +74,7 @@ def create_graph_gtrend():
     date = date_dataframe['date']
     price_list = get_krw_btc_from_upbit_detail()
     price = pd.Series(price_list)
+    price = (price - price.min()) / (price.max() - price.min()) * 100
     plt.plot(date, price/10000)
     plt.plot(date, btc_usd)
     plt.plot(date, buy_bitcoin)
