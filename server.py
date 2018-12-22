@@ -45,8 +45,8 @@ def create_graph_main():
             price_rate = 0
         else:
             price_rate = price_diff / price.iloc[x-1]
-        if trend_rate > 0.10:
-            if price_rate > 0.03:
+        if trend_rate > 0.05:
+            if price_rate > 0.02:
                 strategy[x] = 'BUY'
     dic = {'BUY': 100, 'SELL': -100}
     strategy = data_frame.strategy.map(dic)
@@ -78,7 +78,6 @@ def create_graph_gtrend():
     if diff != 0:
         for _ in range(diff):
             price_list.pop(0)
-    # btc_usd = (btc_usd - btc_usd.min()) / (btc_usd.max() - btc_usd.min()) * 100
     price = pd.Series(price_list)
     plt.figure(figsize=(21, 6))
     plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%m/%d'))
@@ -97,8 +96,8 @@ def create_graph_gtrend():
             price_rate = 0
         else:
             price_rate = price_diff / price.iloc[x-1]
-        if trend_rate > 0.10:
-            if price_rate > 0.03:
+        if trend_rate > 0.05:
+            if price_rate > 0.02:
                 strategy[x] = 'BUY'
     dic = {'BUY': 100, 'SELL': -100}
     strategy = pd.Series(strategy)
