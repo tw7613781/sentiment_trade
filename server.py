@@ -34,7 +34,21 @@ def create_graph_main():
     btc_usd = data_frame.bit_usd.astype(np.float)
     price = data_frame.price.astype(np.float)
     price = (price - price.min()) / (price.max() - price.min()) * 100
-    change_rate = data_frame.change_rate.astype(np.float)*100
+    strategy = ['SELL']*btc_usd.size
+    for x in range(1, btc_usd.size):
+        trend_diff = btc_usd.iloc[x] - btc_usd.iloc[x-1]
+        if btc_usd.iloc[x-1] == 0.0:
+            trend_rate = 0
+        else:
+            trend_rate = trend_diff / btc_usd.iloc[x-1]
+        price_diff = price.iloc[x] - price.iloc[x-1]
+        if price.iloc[x-1] == 0.0:
+            price_rate = 0
+        else:
+            price_rate = price_diff / price.iloc[x-1]
+        if trend_rate > 0.10:
+            if price_rate > 0.03:
+                strategy[x] = 'BUY'
     dic = {'BUY': 100, 'SELL': -100}
     strategy = data_frame.strategy.map(dic)
     plt.figure(figsize=(15, 6))
@@ -42,13 +56,14 @@ def create_graph_main():
     plt.gca().xaxis.set_major_locator(mdates.DayLocator())
     plt.plot(date, price)
     plt.plot(date, btc_usd)
-    plt.plot(date, change_rate, '.')
+    plt.plot(date, price_rate, '.')
+    plt.plot(date, trend_rate, '*')
     plt.plot(date, strategy, '^')
     plt.axhline(y=0, color='k')
     plt.gcf().autofmt_xdate()
     plt.title('sentiment trade')
     plt.legend(['price(normalized)', 'btc_usd gtrend',
-                'change rate with previous day', 'strategy'])
+                'price rate', 'gtrend rate', 'strategy'])
     img = io.BytesIO()
     plt.savefig(img, format='png')
     img.seek(0)
