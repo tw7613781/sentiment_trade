@@ -48,10 +48,8 @@ def create_graph_main():
         if trend_rate > 0.10:
             if price_rate > 0.03:
                 strategy[x] = 'BUY'
-        print(btc_usd.iloc[x], price.iloc[x])
-        print(trend_rate, price_rate)
     dic = {'BUY': 100, 'SELL': -100}
-    strategy = data_frame.strategy.map(dic)
+    strategy = strategy.map(dic)
     price = (price - price.min()) / (price.max() - price.min()) * 100
     plt.figure(figsize=(15, 6))
     plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%m/%d/%Y'))
