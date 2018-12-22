@@ -77,9 +77,17 @@ def create_graph_gtrend():
     strategy = ['SELL']*btc_usd.size
     for x in range(1, btc_usd.size):
         trend_diff = btc_usd.iloc[x] - btc_usd.iloc[x-1]
+        if btc_usd.iloc[x-1] == 0.0:
+            trend_rate = 0
+        else:
+            trend_rate = trend_diff / btc_usd.iloc[x-1]
         price_diff = price.iloc[x] - price.iloc[x-1]
-        if trend_diff > 5:
-            if price_diff > 0:
+        if price.iloc[x-1] == 0.0:
+            price_rate = 0
+        else:
+            price_rate = price_diff / price.iloc[x-1]
+        if trend_rate > 0.10:
+            if price_rate > 0.03:
                 strategy[x] = 'BUY'
     dic = {'BUY': 100, 'SELL': -100}
     strategy = pd.Series(strategy)

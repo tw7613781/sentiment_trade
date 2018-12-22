@@ -98,29 +98,28 @@ if __name__ == '__main__':
                             rate varchar(20),
                             price varchar(20),
                             change_rate varchar(20),
-                            STRATEGY varchar(20))
+                            strategy varchar(20))
                         '''
         db_sqlite.db_init(CMD)
-        # get google trend data of previous day with format (btc_usd_average, buy_bitcon_average)
         BTC_USD_AVE = get_google_trend()
         # get current price from exchage Upbit
         (PRICE, PRICE_HIGH, PRICE_LOW) = get_krw_btc_from_upbit()
-        # get price of yesterday from db
+        # get price and btc_usd gtrend of yesterday from db
         CMD = 'SELECT price, bit_usd FROM history ORDER BY date DESC LIMIT 1'
         ST = db_sqlite.db_select(CMD)
         # no yesterday's data
         if not ST:
             RATE_PRICE = 0
+            PRICE_DIFF = 0
             RATE_GTREND = 0
         else:
             PRICE_YESTERDAY = ST[0][0]
             PRICE_DIFF = float(PRICE) - float(PRICE_YESTERDAY)
             RATE_PRICE = PRICE_DIFF / float(PRICE_YESTERDAY)
             GTREND_YESTERDAY = ST[0][1]
-            GTREND_DIFF = float(BTC_USD_AVE) / float(GTREND_YESTERDAY)
+            GTREND_DIFF = float(BTC_USD_AVE) - float(GTREND_YESTERDAY)
             RATE_GTREND = GTREND_DIFF / float(GTREND_YESTERDAY)
-        # STRATEGY condition: ratio of buy bitcon / btc usd > 35% and price increase rate > 1%
-        if RATE_GTREND > 0.05 and RATE_PRICE > 0:
+        if RATE_GTREND > 0.10 and RATE_PRICE > 0.03:
             STRATEGY = 'BUY'
         else:
             STRATEGY = 'SELL'
@@ -136,6 +135,6 @@ if __name__ == '__main__':
                     today STRATEGY is {STRATEGY} with reference \
                     high price {PRICE_HIGH} and low price {PRICE_LOW}'
         LOGGER.info(MESSAGE)
-        send('me', MESSAGE)
+        # send('me', MESSAGE)
     except BaseException as error:
         LOGGER.error('system abort abnormally due to %s', error)
