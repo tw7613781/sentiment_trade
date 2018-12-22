@@ -49,6 +49,7 @@ def create_graph_main():
             if price_rate > 0.03:
                 strategy[x] = 'BUY'
     dic = {'BUY': 100, 'SELL': -100}
+    strategy = pd.Series(strategy)
     strategy = strategy.map(dic)
     price = (price - price.min()) / (price.max() - price.min()) * 100
     plt.figure(figsize=(15, 6))
