@@ -89,6 +89,6 @@ if __name__ == '__main__':
                     and Upbit BTC/KRW current price is {PRICE_T}, change price is {PRICE_DIFF}, \
                     change rate is {PRICE_RATE}, today STRATEGY is {STRATEGY}'
         LOGGER.info(MESSAGE)
-        # send('me', MESSAGE)
+        send('me', MESSAGE)
     except BaseException as error:
         LOGGER.error('system abort abnormally due to %s', error)
