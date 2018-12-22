@@ -33,7 +33,6 @@ def create_graph_main():
     date = pd.to_datetime(data_frame['date'])
     btc_usd = data_frame.bit_usd.astype(np.float)
     price = data_frame.price.astype(np.float)
-    price = (price - price.min()) / (price.max() - price.min()) * 100
     strategy = ['SELL']*btc_usd.size
     for x in range(1, btc_usd.size):
         trend_diff = btc_usd.iloc[x] - btc_usd.iloc[x-1]
@@ -51,6 +50,7 @@ def create_graph_main():
                 strategy[x] = 'BUY'
     dic = {'BUY': 100, 'SELL': -100}
     strategy = data_frame.strategy.map(dic)
+    price = (price - price.min()) / (price.max() - price.min()) * 100
     plt.figure(figsize=(15, 6))
     plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%m/%d/%Y'))
     plt.gca().xaxis.set_major_locator(mdates.DayLocator())
@@ -80,7 +80,6 @@ def create_graph_gtrend():
             price_list.pop(0)
     # btc_usd = (btc_usd - btc_usd.min()) / (btc_usd.max() - btc_usd.min()) * 100
     price = pd.Series(price_list)
-    price = (price - price.min()) / (price.max() - price.min()) * 100
     plt.figure(figsize=(21, 6))
     plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%m/%d'))
     plt.gca().xaxis.set_major_locator(mdates.DayLocator())
@@ -104,6 +103,7 @@ def create_graph_gtrend():
     dic = {'BUY': 100, 'SELL': -100}
     strategy = pd.Series(strategy)
     strategy = strategy.map(dic)
+    price = (price - price.min()) / (price.max() - price.min()) * 100
     plt.plot(date, price)
     plt.plot(date, btc_usd)
     plt.plot(date, strategy, '^')
