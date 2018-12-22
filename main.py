@@ -119,7 +119,7 @@ if __name__ == '__main__':
             GTREND_YESTERDAY = ST[0][1]
             GTREND_DIFF = float(BTC_USD_AVE) - float(GTREND_YESTERDAY)
             RATE_GTREND = GTREND_DIFF / float(GTREND_YESTERDAY)
-        if RATE_GTREND > 0.10 and RATE_PRICE > 0.03:
+        if RATE_GTREND > 0.25 and RATE_PRICE > 0.01:
             STRATEGY = 'BUY'
         else:
             STRATEGY = 'SELL'
