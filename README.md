@@ -36,8 +36,3 @@ API_ID = 'your api id'
 API_HASH = 'your api hash'
 SESSION = 'any_name'
 ```
-
-## Example output
-> BTC USD : buy bitcion = (65.22346368715084, 29.6536312849162), rate is 0.45464668094218413 and UPBIT BTC/KRW open price is 7248000.0, change price is -16000.0, change rate is -0.0022075055, today strategy is SELL, reference with yesterday high 7254000.0, yesterday low 7220000.0
-
-
