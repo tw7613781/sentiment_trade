@@ -28,7 +28,6 @@ def create_graph_main():
     cmd = 'SELECT * FROM history ORDER BY date'
     data_frame = pd.read_sql_query(cmd, cnx)
     date = pd.to_datetime(data_frame['date'])
-    btc_usd = data_frame.btc_usd.astype(np.float)
     btc_usd_rate = data_frame.btc_usd_rate.astype(np.float)
     price = data_frame.price.astype(np.float)
     price_rate = data_frame.price_rate.astype(np.float)
@@ -40,15 +39,14 @@ def create_graph_main():
     plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%m/%d/%Y'))
     plt.gca().xaxis.set_major_locator(mdates.DayLocator())
     plt.plot(date, price)
-    plt.plot(date, price_rate * 100, '.')
-    plt.plot(date, btc_usd)
-    plt.plot(date, btc_usd_rate * 100, '*')
+    plt.plot(date, btc_usd_rate * 100)
+    plt.plot(date, price_rate * 100, '*')
     plt.plot(date, strategy, '^')
     plt.axhline(y=0, color='k')
     plt.gcf().autofmt_xdate()
     plt.title('sentiment trade')
-    plt.legend(['price(normalized)', 'price change rate', 
-                'btc usd gtrend value', 'btc usd gtrend change rate', 'strategy'])
+    plt.legend(['price(normalized)', 'btc usd gtrend changes', 
+                'price change rate', 'strategy'])
     img = io.BytesIO()
     plt.savefig(img, format='png')
     img.seek(0)
