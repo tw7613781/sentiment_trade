@@ -30,6 +30,20 @@ def get_google_trend():
         LOGGER.error('Error when get_google_trend: %s', error)
         raise error
 
+def get_google_trend_detail():
+    '''
+    get google detail trend data of 5 days
+    '''
+    try:
+        pytrend = TrendReq(tz=-540)
+        pytrend.build_payload(kw_list=['BTC USD'], timeframe='now 7-d')
+        interest_over_time_df = pytrend.interest_over_time()
+        btc_usd = interest_over_time_df['BTC USD']
+        return btc_usd
+    except Exception as error:
+        LOGGER.error('Error when get_google_trend_detail: %s', error)
+        raise error
+
 def get_krw_btc_from_upbit():
     '''
     get recent 2 days bitcoin price
@@ -44,6 +58,24 @@ def get_krw_btc_from_upbit():
         return (today, yesterday)
     except Exception as error:
         LOGGER.error('Error when get_krw_btc_from_upbit: %s', error)
+        raise error
+
+def get_krw_btc_from_upbit_detail():
+    '''
+    get bitcoin price with 60 min interval of 7 days
+    '''
+    try:
+        url = "https://api.upbit.com/v1/candles/minutes/60"
+        querystring = {'market':'KRW-BTC', 'count':168}
+        response = requests.request('GET', url, params=querystring)
+        data = json.loads(response.text, encoding='utf-8')
+        price = []
+        for candle in data:
+            price.append(candle['trade_price'])
+        price.reverse()
+        return price
+    except Exception as error:
+        LOGGER.error('Error when get_krw_btc_from_upbit_detail: %s', error)
         raise error
 
 def send(receiver, msg):

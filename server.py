@@ -9,6 +9,7 @@ from matplotlib import pyplot as plt, dates as mdates
 from flask import Flask, render_template
 import pandas as pd
 import numpy as np
+from main import get_google_trend_detail, get_krw_btc_from_upbit_detail
 APP = Flask(__name__)
 
 
@@ -18,7 +19,9 @@ def index():
     provide route logic for '/'
     '''
     graph_url_main = create_graph_main()
-    return render_template('index.html', graph_url_main=graph_url_main)
+    graph_url_gtrend = create_graph_gtrend()
+    return render_template('index.html', graph_url_main=graph_url_main,
+                           graph_url_gtrend=graph_url_gtrend)
 
 def create_graph_main():
     '''
@@ -47,6 +50,44 @@ def create_graph_main():
     plt.title('sentiment trade')
     plt.legend(['price(normalized)', 'btc usd gtrend changes', 
                 'price change rate', 'strategy'])
+    img = io.BytesIO()
+    plt.savefig(img, format='png')
+    img.seek(0)
+    graph_url = base64.b64encode(img.getvalue()).decode()
+    plt.close()
+    return graph_url
+
+def create_graph_gtrend():
+    '''
+    create a figure base on recent 7 days gtrend data
+    '''
+    price_list = get_krw_btc_from_upbit_detail()
+    price = pd.Series(price_list)
+    price = (price - price.min()) / (price.max() - price.min()) * 100
+    btc_usd = get_google_trend_detail()
+    diff_rate = [0] * btc_usd.size
+    price_rate = [0] * btc_usd.size
+    for x in range(1, btc_usd.size):
+        diff = btc_usd.iloc[x] - btc_usd.iloc[x-1]
+        diff_rate_temp = diff / btc_usd.iloc[x-1]
+        diff_rate[x] = diff_rate_temp
+        diff_price_temp = price_list[x] - price_list[x-1]
+        diff_price_rate_temp = diff_price_temp / price_list[x-1]
+        price_rate[x] = diff_price_rate_temp
+    diff_rate_serise = pd.Series(diff_rate)
+    price_rate_serise = pd.Series(price_rate)
+    plt.figure(figsize=(15, 6))
+    plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%m/%d/%Y-%H:%M:%S'))
+    plt.gca().xaxis.set_major_locator(mdates.HourLocator(interval=4))
+    date_dataframe = btc_usd.axes[0].to_frame(index=False)
+    date = date_dataframe['date']
+    plt.plot(date, price)
+    plt.plot(date, diff_rate_serise * 100)
+    plt.plot(date, price_rate_serise * 100, '*')
+    plt.axhline(y=0, color='k')
+    plt.gcf().autofmt_xdate()
+    plt.title('recent 7 days gtrend')
+    plt.legend(['price (normalized)', 'btc usd gtrend changes', 'price change rate'])
     img = io.BytesIO()
     plt.savefig(img, format='png')
     img.seek(0)
