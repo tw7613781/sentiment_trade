@@ -8,6 +8,7 @@ from datetime import datetime
 from telethon import TelegramClient
 from pytrends.request import TrendReq
 import requests
+import pandas as pd
 import db_sqlite
 import config
 
@@ -104,16 +105,23 @@ def get_krw_btc_from_upbit_7_days():
     get recent 7 days bitcoin price
     '''
     try:
-        url = "https://api.upbit.com/v1/candles/days"
-        querystring = {'market':'KRW-BTC', 'count': 7}
+        url = "https://api.upbit.com/v1/candles/minutes/60"
+        querystring = {'market':'KRW-BTC', 'count':168}
         response = requests.request('GET', url, params=querystring)
         data = json.loads(response.text, encoding='utf-8')
-        print(data)
         price = []
         for candle in data:
             price.append(candle['trade_price'])
         price.reverse()
-        return price
+        price_serise = pd.Series(price)
+        rt = []
+        for x in range(7):
+            if x == 6:
+                mean_temp = price_serise[167-x*24:167-(x+1)*24+1:-1].mean()
+            else:
+                mean_temp = price_serise[167-x*24:167-(x+1)*24:-1].mean()
+            rt.append(mean_temp)
+        return rt
     except Exception as error:
         LOGGER.error('Error when get_krw_btc_from_upbit_7_days: %s', error)
         raise error
