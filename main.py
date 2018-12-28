@@ -61,6 +61,7 @@ def get_google_trend_7_days():
             else:
                 mean_temp = btc_usd[167-x*24:167-(x+1)*24:-1].mean()
             rt.append(mean_temp)
+        rt.reverse()
         return rt
     except Exception as error:
         LOGGER.error('Error when get_google_trend_7_days: %s', error)
@@ -116,11 +117,17 @@ def get_krw_btc_from_upbit_7_days():
         price_serise = pd.Series(price)
         rt = []
         for x in range(7):
+            index_start = 167-x*24
+            index_end = 167-(x+1)*24
+            # print(index_start, index_end)
             if x == 6:
-                mean_temp = price_serise[167-x*24:167-(x+1)*24+1:-1].mean()
+                mean_temp = price_serise[index_start:index_end+1:-1].mean()
             else:
-                mean_temp = price_serise[167-x*24:167-(x+1)*24:-1].mean()
+                mean_temp = price_serise[index_start:index_end:-1].mean()
+            # print('mean: %f'%mean_temp)
             rt.append(mean_temp)
+        rt.reverse()
+        # print(rt)
         return rt
     except Exception as error:
         LOGGER.error('Error when get_krw_btc_from_upbit_7_days: %s', error)
